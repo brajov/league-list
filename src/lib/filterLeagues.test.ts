@@ -46,4 +46,9 @@ describe('getSports', () => {
   it('returns unique sports sorted alphabetically', () => {
     expect(getSports(leagues)).toEqual(['Basketball', 'Soccer']);
   });
+
+  it('returns a single sport when every league shares it (no dropdown is shown)', () => {
+    const soccerOnly = leagues.filter((league) => league.strSport === 'Soccer');
+    expect(getSports(soccerOnly)).toEqual(['Soccer']);
+  });
 });

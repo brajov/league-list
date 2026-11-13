@@ -71,6 +71,10 @@ src/
   error with Retry.
 - **Filtering is local and synchronous.** Case-insensitive, trimmed substring match
   on the league name, plus an exact sport match. No debounce: the list is small.
+- **The sport dropdown appears only when it is useful.** The brief asks for it "if
+  multiple sport types appear in the response", so `App.tsx` renders it only when
+  `getSports` finds more than one sport. With a single sport it could only offer
+  "All sports" and that one sport, which filters nothing.
 - **States.** Loading skeleton, error with Retry, and an empty state with a
   "Clear filters" action.
 - **A single search result opens automatically.** When the filters leave exactly
@@ -88,9 +92,12 @@ src/
 
 ## Known limitation
 
-The free API key (`123`) returns only 10 leagues, all of them Soccer. The sport
-dropdown is built from the data, so today it offers "All sports" and "Soccer"
-only; more sports will appear automatically with a key that returns them.
+The free API key (`123`) returns only 10 leagues, all of them Soccer, so the sport
+dropdown is hidden with that key. It appears automatically as soon as the response
+contains a second sport (for example with a premium key). To see it with the free
+key, point `src/api/leagues.ts` at `search_all_leagues.php?c=United%20States`, which
+returns Soccer, Basketball, Motorsport and American Football leagues (under a
+`countries` key instead of `leagues`, so the schema would need adjusting).
 
 The free key is also rate limited: after a quick burst of requests (roughly 10) the
 API answers HTTP 429. Those responses carry no CORS header, so the browser reports

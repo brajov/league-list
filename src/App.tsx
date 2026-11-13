@@ -17,6 +17,8 @@ export function App() {
   const leaguesQuery = useLeagues();
   const leagues = leaguesQuery.data ?? [];
   const sports = getSports(leagues);
+  // The brief asks for the sport filter only when the response has more than one sport.
+  const showSportFilter = sports.length > 1;
   const visibleLeagues = filterLeagues(leagues, search, sport);
 
   // A single result is opened automatically: there is nothing else to choose.
@@ -72,7 +74,7 @@ export function App() {
         <section className={styles.panel}>
           <div className={styles.filters}>
             <SearchInput value={search} onChange={setSearch} />
-            <SportSelect sports={sports} value={sport} onChange={setSport} />
+            {showSportFilter && <SportSelect sports={sports} value={sport} onChange={setSport} />}
           </div>
           <h2 className={styles.sectionHeader}>
             All Leagues
