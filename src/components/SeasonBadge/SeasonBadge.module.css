@@ -1,3 +1,17 @@
+/* Every state renders inside this box, sized to fit the loaded badge and its
+   caption, so the panel keeps its height as the badge goes from loading to
+   loaded (or to an error) and the rows below do not jump. */
+.frame {
+  --badge-size: 128px;
+  --caption-height: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* min-height rather than height, so a message that wraps on a narrow screen can still grow. */
+  min-height: calc(var(--badge-size) + var(--space-2) + var(--caption-height));
+}
+
 .figure {
   display: flex;
   flex-direction: column;
@@ -7,13 +21,42 @@
 }
 
 .image {
-  width: 128px;
-  height: 128px;
+  width: var(--badge-size);
+  height: var(--badge-size);
   object-fit: contain;
+}
+
+/* Stands in for the image while the badge data loads. */
+.placeholder {
+  width: var(--badge-size);
+  height: var(--badge-size);
+  border-radius: var(--radius-md);
+  background: var(--color-skeleton);
+}
+
+/* The loading state stays invisible for its first 300ms and only then fades
+   in. Most answers (the badge, or a quick 429 from the API) arrive sooner, so
+   the placeholder never flashes up just to be replaced. The text is still in
+   the DOM, so screen readers announce it straight away. */
+.loading {
+  animation: appear 150ms ease-out 300ms backwards;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading {
+    animation-duration: 1ms;
+  }
 }
 
 .caption {
   font-size: 0.8125rem;
+  line-height: var(--caption-height);
   color: var(--color-text-muted);
 }
 
@@ -34,4 +77,9 @@
   color: var(--color-brand);
   font-weight: 600;
   cursor: pointer;
+}
+
+.retry[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: default;
 }

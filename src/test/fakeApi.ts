@@ -10,8 +10,10 @@ type FakeApiState = {
   // search_all_leagues.php?c=United States (the multi-sport demo source)
   countryLeagues: Reply<League[]>;
   // search_all_seasons.php, by league id. A missing id answers `seasons: null`,
-  // which is what the real API does for a league it does not know.
-  seasons: Record<string, Reply<Season[]>>;
+  // which is what the real API does for a league it does not know. A promise
+  // holds the answer back until it resolves, so a test can look at the app
+  // while the request is still in flight.
+  seasons: Record<string, Reply<Season[]> | Promise<Reply<Season[]>>>;
 };
 
 // Replaces `fetch` with a stand-in for TheSportsDB. The state can be changed
@@ -41,7 +43,7 @@ export function fakeApi(initial: Partial<FakeApiState> = {}) {
         return respond(state.countryLeagues, (countries) => ({ countries }));
       }
       if (url.pathname.endsWith('/search_all_seasons.php')) {
-        const reply = state.seasons[url.searchParams.get('id') ?? ''] ?? null;
+        const reply = (await state.seasons[url.searchParams.get('id') ?? '']) ?? null;
         return respond(reply, (seasons) => ({ seasons }));
       }
       throw new Error(`Unexpected request: ${url}`);

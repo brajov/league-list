@@ -237,6 +237,54 @@ describe('season badge', () => {
     expect(api.count('search_all_seasons.php', { id: '4328' })).toBe(2);
   });
 
+  it('keeps the error on screen while a retry is in flight', async () => {
+    const api = fakeApi({ leagues: SOCCER_LEAGUES, seasons: { '4328': 'error' } });
+    const user = renderApp();
+    await findLeagueRows();
+
+    await user.click(leagueRow(/English Premier League/));
+    await screen.findByRole('alert');
+
+    let answer: (reply: typeof PREMIER_LEAGUE_SEASONS) => void = () => {};
+    api.state.seasons['4328'] = new Promise((resolve) => (answer = resolve));
+    await user.click(screen.getByRole('button', { name: 'Retry' }));
+
+    // The error stays put, with the button busy, instead of switching to the loading state.
+    expect(screen.getByRole('alert')).toHaveTextContent('Could not load the badge.');
+    const button = screen.getByRole('button', { name: 'Retrying…' });
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+
+    // The busy button keeps focus, and pressing it again does not send another request.
+    expect(button).toHaveFocus();
+    await user.keyboard('{Enter}');
+    expect(api.count('search_all_seasons.php', { id: '4328' })).toBe(2);
+
+    answer(PREMIER_LEAGUE_SEASONS);
+    expect(await screen.findByRole('img')).toBeInTheDocument();
+  });
+
+  it('shows that a failed retry ran, even when the API fails instantly', async () => {
+    fakeApi({ leagues: SOCCER_LEAGUES, seasons: { '4328': 'error' } });
+    const user = renderApp();
+    await findLeagueRows();
+
+    await user.click(leagueRow(/English Premier League/));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load the badge.');
+    await user.click(screen.getByRole('button', { name: 'Retry' }));
+
+    // The fake API has already failed again, but the button stays busy for a moment.
+    const button = screen.getByRole('button', { name: 'Retrying…' });
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+
+    // Then it is ready again, with wording that says the retry did not help.
+    // It is the same button, still focused, so a keyboard user can retry again.
+    await waitFor(() => expect(button).toHaveAccessibleName('Retry'));
+    expect(button).toHaveAttribute('aria-disabled', 'false');
+    expect(button).toHaveFocus();
+    expect(screen.getByRole('alert')).toHaveTextContent('Still could not load the badge.');
+  });
+
   it('falls back to a message when the badge image itself fails to load', async () => {
     fakeApi({ leagues: SOCCER_LEAGUES, seasons: { '4328': PREMIER_LEAGUE_SEASONS } });
     const user = renderApp();
