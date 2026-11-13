@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { League } from '../../api/schemas';
 import { usePrefetchSeasonBadge, useSeasonBadge } from '../../hooks/useSeasonBadge';
 import { SeasonBadge } from '../SeasonBadge/SeasonBadge';
@@ -21,7 +21,13 @@ export function LeagueCard({ league, isExpanded, onToggle }: LeagueCardProps) {
   const prefetchTimer = useRef<number | undefined>(undefined);
   const panelId = `league-panel-${league.idLeague}`;
 
+  // Cancel a pending preload if the card unmounts, e.g. when a filter removes it.
+  useEffect(() => () => window.clearTimeout(prefetchTimer.current), []);
+
   function schedulePrefetch() {
+    // A click fires both mouseenter and focus. Clear the first timer so only
+    // one is pending and cancelPrefetch always reaches it.
+    cancelPrefetch();
     prefetchTimer.current = window.setTimeout(
       () => prefetchSeasonBadge(league.idLeague),
       PREFETCH_DELAY_MS,
