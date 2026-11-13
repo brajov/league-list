@@ -364,11 +364,11 @@ describe('pagination', () => {
     const previous = within(pagination).getByRole('button', { name: 'Previous' });
     const next = within(pagination).getByRole('button', { name: 'Next' });
     expect(pagination).toHaveTextContent(`1–${PAGE_SIZE} of ${MANY_LEAGUES.length}`);
-    expect(previous).toBeDisabled();
+    expect(previous).toHaveAttribute('aria-disabled', 'true');
 
     await user.click(next);
     expect(rowNames(await findLeagueRows())[0]).toBe(`League ${PAGE_SIZE + 1}`);
-    expect(previous).toBeEnabled();
+    expect(previous).toHaveAttribute('aria-disabled', 'false');
 
     await user.click(next);
     const lastPage = await findLeagueRows();
@@ -376,7 +376,11 @@ describe('pagination', () => {
     expect(pagination).toHaveTextContent(
       `${PAGE_SIZE * 2 + 1}–${MANY_LEAGUES.length} of ${MANY_LEAGUES.length}`,
     );
-    expect(next).toBeDisabled();
+    expect(next).toHaveAttribute('aria-disabled', 'true');
+    // Next keeps the keyboard focus on the last page, and pressing it again does nothing.
+    expect(next).toHaveFocus();
+    await user.click(next);
+    expect(rowNames(await findLeagueRows())[0]).toBe(`League ${PAGE_SIZE * 2 + 1}`);
 
     await user.click(previous);
     expect(rowNames(await findLeagueRows())[0]).toBe(`League ${PAGE_SIZE + 1}`);

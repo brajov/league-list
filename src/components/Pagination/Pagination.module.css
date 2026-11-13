@@ -38,13 +38,13 @@
   cursor: pointer;
 }
 
-.button:hover:not(:disabled) {
+.button:hover:not([aria-disabled='true']) {
   background: var(--color-row-hover);
   border-color: var(--color-brand);
   color: var(--color-brand);
 }
 
-.button:disabled {
+.button[aria-disabled='true'] {
   color: var(--color-text-muted);
   cursor: not-allowed;
   opacity: 0.5;

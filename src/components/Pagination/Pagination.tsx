@@ -11,14 +11,21 @@ type PaginationProps = {
 
 // Previous / Next controls under the list. Rendered only when there is more
 // than one page.
+//
+// The buttons are aria-disabled rather than disabled at the ends: a disabled
+// button loses keyboard focus, so pressing Next onto the last page would drop
+// a keyboard user back to the top of the document.
 export function Pagination({ page, pageCount, first, last, total, onPageChange }: PaginationProps) {
+  const isFirst = page <= 1;
+  const isLast = page >= pageCount;
+
   return (
     <nav className={styles.pagination} aria-label="Pagination">
       <button
         type="button"
         className={styles.button}
-        onClick={() => onPageChange(page - 1)}
-        disabled={page <= 1}
+        aria-disabled={isFirst}
+        onClick={() => !isFirst && onPageChange(page - 1)}
       >
         Previous
       </button>
@@ -32,8 +39,8 @@ export function Pagination({ page, pageCount, first, last, total, onPageChange }
       <button
         type="button"
         className={styles.button}
-        onClick={() => onPageChange(page + 1)}
-        disabled={page >= pageCount}
+        aria-disabled={isLast}
+        onClick={() => !isLast && onPageChange(page + 1)}
       >
         Next
       </button>
