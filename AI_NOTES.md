@@ -21,6 +21,13 @@ under the author's direction and review:
   - a Retry button on the badge that shows it is working and says when it failed again;
   - component tests that drive the app like a user, run against deliberately
     broken code to make sure they fail.
+- **Follow-up review:** an analysis of possible improvements, which led to:
+  - pagination buttons that keep keyboard focus at the first and last page;
+  - typed API errors with a request time limit, and a reason shown with the
+    league list error;
+  - an error boundary, accent-insensitive search and the `jsx-a11y` and
+    `exhaustive-deps` lint rules;
+  - the "Future improvements" list in the README.
 - **API key handling:** researching how to configure keys in a Vite app (Vite's
   env docs, TheSportsDB's docs on how keys are passed). This led to reading the key
   from `VITE_SPORTSDB_API_KEY` with the free key as the fallback, an `.env.example`,
@@ -29,7 +36,10 @@ under the author's direction and review:
 
 ## Left out for time
 
-- Debounced search and keeping filters in the URL.
+See "Future improvements" in the README for the full list. The main ones:
+
+- A server-side proxy, a persisted cache and filters in the URL.
+- Pagination beyond Previous / Next, for a premium key's 3000 leagues.
 - Showing all of a league's seasons; only the first season with a badge is shown.
 - Dark mode and broader visual polish.
 - CI configuration and deployment.
