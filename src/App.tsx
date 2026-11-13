@@ -25,7 +25,7 @@ export function App() {
   const leaguesQuery = useLeagues();
   const leagues = leaguesQuery.data ?? [];
   const sports = getSports(leagues);
-  
+
   // The brief asks for the sport filter only when the response has more than one sport.
   const showSportFilter = sports.length > 1;
   const visibleLeagues = filterLeagues(leagues, search, sport);
