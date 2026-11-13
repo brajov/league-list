@@ -13,6 +13,9 @@ export function App() {
   const [search, setSearch] = useState('');
   const [sport, setSport] = useState(ALL_SPORTS);
   const [expandedLeagueId, setExpandedLeagueId] = useState<string | null>(null);
+  // A league the user closed while it was the only result, so it is not
+  // reopened automatically straight away.
+  const [dismissedLeagueId, setDismissedLeagueId] = useState<string | null>(null);
 
   const leaguesQuery = useLeagues();
   const leagues = leaguesQuery.data ?? [];
@@ -22,10 +25,18 @@ export function App() {
   const visibleLeagues = filterLeagues(leagues, search, sport);
 
   // A single result is opened automatically: there is nothing else to choose.
-  const openLeagueId = visibleLeagues.length === 1 ? visibleLeagues[0].idLeague : expandedLeagueId;
+  // The user can still close it.
+  const singleLeagueId = visibleLeagues.length === 1 ? visibleLeagues[0].idLeague : null;
+  const openLeagueId =
+    singleLeagueId !== null && singleLeagueId !== dismissedLeagueId
+      ? singleLeagueId
+      : expandedLeagueId;
 
+  // Toggles what is on screen, so closing an automatically opened league works too.
   function toggleLeague(leagueId: string) {
-    setExpandedLeagueId((current) => (current === leagueId ? null : leagueId));
+    const isOpen = leagueId === openLeagueId;
+    setExpandedLeagueId(isOpen ? null : leagueId);
+    setDismissedLeagueId(isOpen ? leagueId : null);
   }
 
   function clearFilters() {
