@@ -82,3 +82,9 @@ src/
 The free API key (`123`) returns only 10 leagues, all of them Soccer. The sport
 dropdown is built from the data, so today it offers "All sports" and "Soccer"
 only; more sports will appear automatically with a key that returns them.
+
+The free key is also rate limited: after a quick burst of requests (roughly 10) the
+API answers HTTP 429. Those responses carry no CORS header, so the browser reports
+a generic network error and the app shows its normal error state with Retry.
+Because responses are cached, each league's badge is requested at most once per
+page load.

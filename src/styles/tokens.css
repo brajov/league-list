@@ -22,6 +22,9 @@
   --space-5: 24px;
   --space-6: 40px;
 
+  /* Shared height for the search input and sport select so they line up. */
+  --control-height: 40px;
+
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-pill: 999px;
