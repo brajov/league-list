@@ -7,6 +7,7 @@ import { SearchInput } from './components/SearchInput/SearchInput';
 import { SportSelect } from './components/SportSelect/SportSelect';
 import { StatusMessage } from './components/StatusMessage/StatusMessage';
 import { useLeagues } from './hooks/useLeagues';
+import { useOpenLeague } from './hooks/useOpenLeague';
 import { ALL_SPORTS, filterLeagues } from './lib/filterLeagues';
 import { getSports } from './lib/getSports';
 import { paginate } from './lib/paginate';
@@ -20,33 +21,16 @@ export function App() {
   const [sport, setSport] = useState(ALL_SPORTS);
   const [page, setPage] = useState(1);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const [expandedLeagueId, setExpandedLeagueId] = useState<string | null>(null);
-  // A league the user closed while it was the only result, so it is not
-  // reopened automatically straight away.
-  const [dismissedLeagueId, setDismissedLeagueId] = useState<string | null>(null);
 
   const leaguesQuery = useLeagues();
   const leagues = leaguesQuery.data ?? [];
   const sports = getSports(leagues);
+  
   // The brief asks for the sport filter only when the response has more than one sport.
   const showSportFilter = sports.length > 1;
   const visibleLeagues = filterLeagues(leagues, search, sport);
   const currentPage = paginate(visibleLeagues, page, PAGE_SIZE);
-
-  // A single result is opened automatically: there is nothing else to choose.
-  // The user can still close it.
-  const singleLeagueId = visibleLeagues.length === 1 ? visibleLeagues[0].idLeague : null;
-  const openLeagueId =
-    singleLeagueId !== null && singleLeagueId !== dismissedLeagueId
-      ? singleLeagueId
-      : expandedLeagueId;
-
-  // Toggles what is on screen, so closing an automatically opened league works too.
-  function toggleLeague(leagueId: string) {
-    const isOpen = leagueId === openLeagueId;
-    setExpandedLeagueId(isOpen ? null : leagueId);
-    setDismissedLeagueId(isOpen ? leagueId : null);
-  }
+  const { openLeagueId, toggleLeague } = useOpenLeague(visibleLeagues);
 
   // A new filter starts again from the first page.
   function changeSearch(value: string) {
