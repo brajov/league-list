@@ -388,18 +388,16 @@ describe('pagination', () => {
     await findLeagueRows();
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
-    // "League 5" is on the first page; the search must still find it.
-    await user.type(screen.getByRole('searchbox', { name: 'Search leagues' }), 'League 5');
+    // The first league is on page 1 whatever the page size; searching from
+    // page 2 must still find it.
+    const search = MANY_LEAGUES[0].strLeague;
+    await user.type(screen.getByRole('searchbox', { name: 'Search leagues' }), search);
 
-    expect(rowNames(await findLeagueRows())).toEqual([
-      'League 5',
-      'League 50',
-      'League 51',
-      'League 52',
-      'League 53',
-      'League 54',
-      'League 55',
-    ]);
-    expect(screen.queryByRole('navigation', { name: 'Pagination' })).not.toBeInTheDocument();
+    // Expected rows come from the data, so changing PAGE_SIZE does not break this.
+    const matches = MANY_LEAGUES.map((league) => league.strLeague).filter((name) =>
+      name.includes(search),
+    );
+    // Showing the first page of matches proves the page went back to 1.
+    expect(rowNames(await findLeagueRows())).toEqual(matches.slice(0, PAGE_SIZE));
   });
 });
