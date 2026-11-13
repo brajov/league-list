@@ -21,35 +21,11 @@ See [Known limitation](#known-limitation).
 
 ## API key
 
-The app uses TheSportsDB's free test key (`123`) unless you give it your own. To
-use your own key, copy `.env.example` to `.env.local` (gitignored) and set it:
-
-```bash
-cp .env.example .env.local
-```
-
-Then set the key in `.env.local`:
-
-```
-VITE_SPORTSDB_API_KEY=your-key
-```
-
-Restart `npm run dev` after changing it, because Vite reads `.env` files on
-startup. For a build, the variable can also come from the environment
-(`VITE_SPORTSDB_API_KEY=your-key npm run build`), for example a CI secret. A key
-that is unset or blank falls back to `123`. The lookup lives in `src/api/config.ts`.
-
-**The key is not secret.** Vite writes `VITE_*` values into the JavaScript bundle
-at build time, and API v1 puts the key in the request URL, so anyone using the app
-can read it in the network tab. Vite's docs say not to put API keys in `VITE_*`
-variables, and TheSportsDB's docs note that a v1 key is visible to anyone who
-looks at the requests. That is acceptable for the
-public test key and for a personal demo. For a paid key in production, keep the key
-on a server: a small proxy or serverless function holds it in a server-only
-environment variable, adds it to the upstream request (v2 takes it as an
-`X-API-KEY` header), and the app calls the proxy instead of TheSportsDB. A proxy
-also lets you cache responses and rate-limit callers, so one user cannot use up
-the key's quota (30 requests a minute on the free key, 100 on premium).
+The app uses TheSportsDB's free test key (`123`). To use your own, copy
+`.env.example` to `.env.local`, set `VITE_SPORTSDB_API_KEY`, and restart
+`npm run dev`. A `VITE_*` value is built into the bundle and v1 of the API puts
+the key in the URL, so the key is public; a paid key belongs behind a server-side
+proxy.
 
 ## Scripts
 
@@ -98,56 +74,28 @@ src/
 
 ## Design decisions
 
-- **React Query for fetching and caching.** `staleTime` and `gcTime` are `Infinity`
-  and window-focus refetch is off, all set once in `createQueryClient()`.
-  The league list is fetched once. Each badge is fetched the first time its card
-  is opened or preloaded (see below) and served from cache after that, keyed by
-  `['seasonBadge', leagueId]`.
-- **Zod at the network boundary.** Types are inferred from the schemas, so there is
-  no second set of hand-written types. `fetchJson` throws on a non-2xx status or a
-  schema mismatch. The `leagues` (or `countries`) envelope must be an array, but each row is
-  validated on its own: a malformed row is dropped with a `console.warn` instead of
-  failing the whole list. `seasons` may be `null` (unknown league id) and `strBadge`
-  may be missing or `null`.
-- **No automatic retry.** The free key answers bursts with HTTP 429, and an
-  immediate retry would hit the same limit. Every error state has a Retry button,
-  so the user decides when to try again.
-- **Badge shown inside the card.** One card is open at a time. The card header is a
-  real `<button>` with `aria-expanded`. The badge area shows loading, the first
-  season that has a badge (with its season label), "No badge available", or an
-  error with Retry. If the image itself fails to load, a message replaces it.
-- **Filtering is local and synchronous.** Case-insensitive, trimmed substring match
-  on the league name, plus an exact sport match. No debounce: the list is small.
-- **The sport dropdown appears only when it is useful.** The brief asks for it "if
-  multiple sport types appear in the response", so `App.tsx` renders it only when
-  `getSports` finds more than one sport. With a single sport it could only offer
-  "All sports" and that one sport, which filters nothing.
-- **States.** Loading skeleton, error with Retry, and an empty state with a
-  "Clear filters" action.
-- **A single search result opens automatically.** When the filters leave exactly
-  one league, its badge is shown without a click. This is derived in `App.tsx`
-  rather than stored, so widening the search restores whatever was open before.
-  Clicking the row still closes it, and it stays closed while it remains the only
-  result.
-- **Badge preloading.** Resting the pointer on a row (or focusing it) for 150ms
-  fetches that league's badge data and image into the cache, so it is ready when
-  the row is opened. The short delay stops a sweep across the list from firing a
-  request per row and tripping the API's rate limit. A pending preload is
-  cancelled when the pointer leaves or the row is filtered out.
-- **Plain CSS Modules** with a single tokens file. The list is a single column of
-  rows inside one panel, so opening a row never leaves gaps. Filters stack on
-  narrow screens.
+- **Caching with React Query.** `staleTime` and `gcTime` are `Infinity`, set once
+  in `createQueryClient()`. The league list is fetched once, and each badge is
+  fetched the first time its row is opened, then served from cache
+  (`['seasonBadge', leagueId]`). The cache lasts until the page is reloaded.
+- **Zod at the network boundary.** Types are inferred from the schemas. A malformed
+  league row is dropped with a `console.warn` instead of failing the whole list.
+- **No automatic retry, and no preloading.** The free key is tightly rate limited,
+  so the app only sends a request when the user asks for something. Every error
+  state has a Retry button; the badge's button shows "Retrying…" and the message
+  changes if the retry fails too.
+- **Badge shown inside the row.** One row is open at a time. It shows the first
+  season that has a badge, or a loading, "No badge available", error or
+  broken-image state, all in a fixed-height frame so the list does not jump.
+- **The sport dropdown appears only when the response has more than one sport**,
+  as the brief asks.
+- **A single search result opens automatically**, and can still be closed.
+- **Filtering is local.** Case-insensitive substring match on the name plus an
+  exact sport match. No debounce: the list is small.
+- **Plain CSS Modules** with one tokens file; filters stack on narrow screens.
 - **Tests act like a user.** `App.test.tsx` renders the whole app with the real
-  query client and fakes only `fetch`. Tests find elements by role and visible
-  text, and type, click and hover with Testing Library's `user-event`. They cover
-  search, the sport filter (hidden and shown), empty and error states with Retry,
-  opening a badge, caching (each badge is requested once), the image fallback,
-  the single-result auto-open (and closing it), and hover preloading. The pure
-  filter functions, the Zod schemas and the API key fallback have their own unit
-  tests.
-- **Few dependencies.** React, React Query and Zod at runtime; Vite, TypeScript,
-  Vitest, Testing Library, jsdom, oxlint and Prettier for tooling. No router,
-  state library or UI kit.
+  query client and fakes only `fetch`. The filter functions, schemas and API key
+  fallback have unit tests.
 
 ## Known limitation
 
@@ -159,8 +107,7 @@ To see it with the free key, open the app with `?demo=multi-sport`. That loads
 Basketball, Motorsport and American Football leagues with real ids, so their
 badges work too.
 
-The free key is also rate limited. TheSportsDB documents 30 requests a minute, but
-a quick burst of roughly 10 already got HTTP 429 in testing. Those responses carry
-no CORS header, so the browser reports a generic network error and the app shows
-its normal error state with Retry. Because responses are cached, a league's badge
-is not requested again once it has loaded.
+The free key is also rate limited: TheSportsDB documents 30 requests a minute, but
+in testing fewer than 10 in a minute were enough to get HTTP 429. Those responses
+carry no CORS header, so the app sees a network error and shows its error state
+with Retry. Waiting about a minute clears it.

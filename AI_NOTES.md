@@ -17,7 +17,8 @@ under the author's direction and review:
   - a fix so a league opened automatically (single search result) can be closed;
   - the badge image fallback;
   - no automatic retry on rate-limited requests;
-  - a fix for the hover-preload timer;
+  - removing badge preloading on hover, which used up the API's rate limit;
+  - a Retry button on the badge that shows it is working and says when it failed again;
   - component tests that drive the app like a user, run against deliberately
     broken code to make sure they fail.
 - **API key handling:** researching how to configure keys in a Vite app (Vite's
