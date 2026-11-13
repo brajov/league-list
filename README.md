@@ -1,0 +1,84 @@
+# League List
+
+A small React + TypeScript single-page app that lists sports leagues from
+[TheSportsDB](https://www.thesportsdb.com/), filters them by name and sport, and
+shows a season badge when you click a league.
+
+## Run it
+
+Requires Node 22.12+ (or 24+) and npm.
+
+```bash
+npm install
+npm run dev       # http://localhost:5173
+```
+
+## Scripts
+
+| Script            | What it does                               |
+| ----------------- | ------------------------------------------ |
+| `npm run dev`     | Start the Vite dev server                  |
+| `npm run build`   | Type-check (`tsc -b`) and build to `dist/` |
+| `npm run preview` | Serve the production build locally         |
+| `npm test`        | Run the Vitest unit tests once             |
+| `npm run lint`    | Lint and format-check with Biome           |
+| `npm run format`  | Apply Biome formatting and safe lint fixes |
+
+## Structure: where to change what
+
+```
+src/
+  main.tsx            QueryClient (cache settings) + render
+  App.tsx             filter state (search, sport, expanded league) and page layout
+  api/
+    schemas.ts        Zod schemas; the League and Season types are inferred from them
+    client.ts         fetchJson(url, schema): fetch, check status, validate
+    leagues.ts        getLeagues(), getSeasonBadge(leagueId)
+  hooks/
+    useLeagues.ts     React Query hook for the league list
+    useSeasonBadge.ts React Query hook for one league's badge
+  lib/
+    filterLeagues.ts  pure filter by name + sport (tested)
+    getSports.ts      unique sorted sports for the dropdown (tested)
+  components/         one folder per component: Component.tsx + Component.module.css
+  styles/
+    tokens.css        colours, spacing, radii (CSS variables)
+    global.css        reset, body, focus ring
+```
+
+- New API field or endpoint: `api/schemas.ts`, then `api/leagues.ts`, then a hook in `hooks/`.
+- New filter or sort: a pure function in `lib/` (with a test), state in `App.tsx`.
+- New UI: a new folder in `components/`.
+- Colours or spacing: `styles/tokens.css`.
+
+## Design decisions
+
+- **React Query for fetching and caching.** `staleTime` and `gcTime` are `Infinity`,
+  window-focus refetch is off and `retry` is 1, all set once on the `QueryClient`.
+  The league list is fetched once. Each badge is fetched the first time its card
+  is opened (the query is only enabled while expanded) and served from cache after
+  that, keyed by `['seasonBadge', leagueId]`.
+- **Zod at the network boundary.** Types are inferred from the schemas, so there is
+  no second set of hand-written types. `fetchJson` throws on a non-2xx status or a
+  schema mismatch. The `leagues` envelope must be an array, but each row is
+  validated on its own: a malformed row is dropped with a `console.warn` instead of
+  failing the whole list. `seasons` may be `null` (unknown league id) and `strBadge`
+  may be missing or `null`.
+- **Badge shown inside the card.** One card is open at a time. The card header is a
+  real `<button>` with `aria-expanded`. The badge area shows loading, the first
+  season that has a badge (with its season label), "No badge available", or an
+  error with Retry.
+- **Filtering is local and synchronous.** Case-insensitive, trimmed substring match
+  on the league name, plus an exact sport match. No debounce: the list is small.
+- **States.** Loading skeleton, error with Retry, and an empty state with a
+  "Clear filters" action.
+- **Plain CSS Modules** with a single tokens file. Mobile-first: one column on
+  phones, two from 640px, three from 1024px. Filters stack on narrow screens.
+- **Few dependencies.** React, React Query and Zod at runtime; Vite, TypeScript,
+  Vitest and Biome for tooling. No router, state library or UI kit.
+
+## Known limitation
+
+The free API key (`123`) returns only 10 leagues, all of them Soccer. The sport
+dropdown is built from the data, so today it offers "All sports" and "Soccer"
+only; more sports will appear automatically with a key that returns them.
