@@ -26,7 +26,11 @@ use your own key, copy `.env.example` to `.env.local` (gitignored) and set it:
 
 ```bash
 cp .env.example .env.local
-# .env.local
+```
+
+Then set the key in `.env.local`:
+
+```
 VITE_SPORTSDB_API_KEY=your-key
 ```
 
@@ -38,7 +42,8 @@ that is unset or blank falls back to `123`. The lookup lives in `src/api/config.
 **The key is not secret.** Vite writes `VITE_*` values into the JavaScript bundle
 at build time, and API v1 puts the key in the request URL, so anyone using the app
 can read it in the network tab. Vite's docs say not to put API keys in `VITE_*`
-variables, and TheSportsDB says the same of v1 keys. That is acceptable for the
+variables, and TheSportsDB's docs note that a v1 key is visible to anyone who
+looks at the requests. That is acceptable for the
 public test key and for a personal demo. For a paid key in production, keep the key
 on a server: a small proxy or serverless function holds it in a server-only
 environment variable, adds it to the upstream request (v2 takes it as an
@@ -64,10 +69,10 @@ the key's quota (30 requests a minute on the free key, 100 on premium).
 src/
   main.tsx            render
   queryClient.ts      createQueryClient(): cache and retry settings, shared with the tests
-  App.tsx             filter state (search, sport, expanded league) and page layout
+  App.tsx             filter and open-league state, and page layout
   api/
-    config.ts         API key (VITE_SPORTSDB_API_KEY, falling back to the free key) and base URL
-    schemas.ts        Zod schemas; the League and Season types are inferred from them
+    config.ts         API key (VITE_SPORTSDB_API_KEY, else the free key) and base URL (tested)
+    schemas.ts        Zod schemas; League and Season types are inferred from them (tested)
     client.ts         fetchJson(url, schema): fetch, check status, validate
     leagues.ts        getLeagues(source), getSeasonBadge(leagueId)
   hooks/
@@ -96,11 +101,11 @@ src/
 - **React Query for fetching and caching.** `staleTime` and `gcTime` are `Infinity`
   and window-focus refetch is off, all set once in `createQueryClient()`.
   The league list is fetched once. Each badge is fetched the first time its card
-  is opened (the query is only enabled while expanded) and served from cache after
-  that, keyed by `['seasonBadge', leagueId]`.
+  is opened or preloaded (see below) and served from cache after that, keyed by
+  `['seasonBadge', leagueId]`.
 - **Zod at the network boundary.** Types are inferred from the schemas, so there is
   no second set of hand-written types. `fetchJson` throws on a non-2xx status or a
-  schema mismatch. The `leagues` envelope must be an array, but each row is
+  schema mismatch. The `leagues` (or `countries`) envelope must be an array, but each row is
   validated on its own: a malformed row is dropped with a `console.warn` instead of
   failing the whole list. `seasons` may be `null` (unknown league id) and `strBadge`
   may be missing or `null`.
@@ -137,23 +142,25 @@ src/
   text, and type, click and hover with Testing Library's `user-event`. They cover
   search, the sport filter (hidden and shown), empty and error states with Retry,
   opening a badge, caching (each badge is requested once), the image fallback,
-  the single-result auto-open, and hover preloading. The pure filter functions
-  and the Zod schemas have their own unit tests.
+  the single-result auto-open (and closing it), and hover preloading. The pure
+  filter functions, the Zod schemas and the API key fallback have their own unit
+  tests.
 - **Few dependencies.** React, React Query and Zod at runtime; Vite, TypeScript,
-  Vitest, Testing Library, jsdom, oxlint and Prettier for tooling. No router, state library or UI kit.
+  Vitest, Testing Library, jsdom, oxlint and Prettier for tooling. No router,
+  state library or UI kit.
 
 ## Known limitation
 
 The free API key (`123`) returns only 10 leagues, all of them Soccer, so the sport
 dropdown is hidden with that key. It appears automatically as soon as the response
-contains a second sport (for example with a premium key in `VITE_SPORTSDB_API_KEY`). To see it with the free
-key, open the app with `?demo=multi-sport`. That loads
+contains a second sport (for example with a premium key in `VITE_SPORTSDB_API_KEY`).
+To see it with the free key, open the app with `?demo=multi-sport`. That loads
 `search_all_leagues.php?c=United%20States` instead, which returns Soccer,
 Basketball, Motorsport and American Football leagues with real ids, so their
 badges work too.
 
-The free key is also rate limited: after a quick burst of requests (roughly 10) the
-API answers HTTP 429. Those responses carry no CORS header, so the browser reports
-a generic network error and the app shows its normal error state with Retry.
-Because responses are cached, each league's badge is requested at most once per
-page load.
+The free key is also rate limited. TheSportsDB documents 30 requests a minute, but
+a quick burst of roughly 10 already got HTTP 429 in testing. Those responses carry
+no CORS header, so the browser reports a generic network error and the app shows
+its normal error state with Retry. Because responses are cached, a league's badge
+is not requested again once it has loaded.

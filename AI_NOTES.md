@@ -12,11 +12,19 @@ under the author's direction and review:
   template boilerplate and adding Prettier for formatting.
 - **Implementation:** the API layer, hooks, filter functions, components, styles,
   unit tests and these docs, following the agreed plan.
-- **Review:** checking the app against the brief, which led to the
-  `?demo=multi-sport` switch, the badge image fallback, no automatic retry on
-  rate-limited requests, a fix for the hover-preload timer, and component tests
-  that drive the app like a user (run against deliberately broken code to make
-  sure they fail).
+- **Review:** checking the app against the brief, which led to:
+  - the `?demo=multi-sport` switch, so the sport filter can be seen with the free key;
+  - a fix so a league opened automatically (single search result) can be closed;
+  - the badge image fallback;
+  - no automatic retry on rate-limited requests;
+  - a fix for the hover-preload timer;
+  - component tests that drive the app like a user, run against deliberately
+    broken code to make sure they fail.
+- **API key handling:** researching how to configure keys in a Vite app (Vite's
+  env docs, TheSportsDB's docs on how keys are passed). This led to reading the key
+  from `VITE_SPORTSDB_API_KEY` with the free key as the fallback, an `.env.example`,
+  and a README note that a key in a browser bundle is public, so a paid key belongs
+  behind a server-side proxy.
 
 ## Left out for time
 
