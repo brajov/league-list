@@ -9,7 +9,7 @@ under the author's direction and review:
   (shape, the 10-league / Soccer-only limit of the free key, `seasons: null` for
   unknown ids, CORS) and agreeing the stack and folder structure.
 - **Scaffolding:** creating the Vite React + TypeScript project, removing the
-  template boilerplate and replacing its linter with Biome.
+  template boilerplate and adding Prettier for formatting.
 - **Implementation:** the API layer, hooks, filter functions, components, styles,
   unit tests and these docs, following the agreed plan.
 

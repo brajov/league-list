@@ -17,7 +17,7 @@ export function StatusMessage({ variant, message, actionLabel, onAction }: Statu
         <span className={styles.visuallyHidden}>{message}</span>
         <div className={styles.skeletonGrid} aria-hidden="true">
           {Array.from({ length: SKELETON_CARD_COUNT }, (_, index) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: static placeholders that never reorder
+            // Index keys are fine here: static placeholders that never reorder.
             <div key={index} className={styles.skeletonCard} />
           ))}
         </div>

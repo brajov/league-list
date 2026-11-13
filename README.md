@@ -15,14 +15,15 @@ npm run dev       # http://localhost:5173
 
 ## Scripts
 
-| Script            | What it does                               |
-| ----------------- | ------------------------------------------ |
-| `npm run dev`     | Start the Vite dev server                  |
-| `npm run build`   | Type-check (`tsc -b`) and build to `dist/` |
-| `npm run preview` | Serve the production build locally         |
-| `npm test`        | Run the Vitest unit tests once             |
-| `npm run lint`    | Lint and format-check with Biome           |
-| `npm run format`  | Apply Biome formatting and safe lint fixes |
+| Script                 | What it does                               |
+| ---------------------- | ------------------------------------------ |
+| `npm run dev`          | Start the Vite dev server                  |
+| `npm run build`        | Type-check (`tsc -b`) and build to `dist/` |
+| `npm run preview`      | Serve the production build locally         |
+| `npm test`             | Run the Vitest unit tests once             |
+| `npm run lint`         | Lint with oxlint                           |
+| `npm run format`       | Format every file with Prettier            |
+| `npm run format:check` | Check formatting without writing           |
 
 ## Structure: where to change what
 
@@ -75,7 +76,7 @@ src/
 - **Plain CSS Modules** with a single tokens file. Mobile-first: one column on
   phones, two from 640px, three from 1024px. Filters stack on narrow screens.
 - **Few dependencies.** React, React Query and Zod at runtime; Vite, TypeScript,
-  Vitest and Biome for tooling. No router, state library or UI kit.
+  Vitest, oxlint and Prettier for tooling. No router, state library or UI kit.
 
 ## Known limitation
 
