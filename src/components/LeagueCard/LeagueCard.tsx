@@ -1,13 +1,7 @@
-import { useEffect, useRef } from 'react';
 import type { League } from '../../api/schemas';
-import { usePrefetchSeasonBadge, useSeasonBadge } from '../../hooks/useSeasonBadge';
+import { useSeasonBadge } from '../../hooks/useSeasonBadge';
 import { SeasonBadge } from '../SeasonBadge/SeasonBadge';
 import styles from './LeagueCard.module.css';
-
-// How long the pointer must rest on a card before its badge is preloaded.
-// Stops a quick sweep across the list from firing a request per card, which
-// would trip the API's rate limit.
-const PREFETCH_DELAY_MS = 150;
 
 type LeagueCardProps = {
   league: League;
@@ -17,26 +11,7 @@ type LeagueCardProps = {
 
 export function LeagueCard({ league, isExpanded, onToggle }: LeagueCardProps) {
   const badgeQuery = useSeasonBadge(league.idLeague, isExpanded);
-  const prefetchSeasonBadge = usePrefetchSeasonBadge();
-  const prefetchTimer = useRef<number | undefined>(undefined);
   const panelId = `league-panel-${league.idLeague}`;
-
-  // Cancel a pending preload if the card unmounts, e.g. when a filter removes it.
-  useEffect(() => () => window.clearTimeout(prefetchTimer.current), []);
-
-  function schedulePrefetch() {
-    // A click fires both mouseenter and focus. Clear the first timer so only
-    // one is pending and cancelPrefetch always reaches it.
-    cancelPrefetch();
-    prefetchTimer.current = window.setTimeout(
-      () => prefetchSeasonBadge(league.idLeague),
-      PREFETCH_DELAY_MS,
-    );
-  }
-
-  function cancelPrefetch() {
-    window.clearTimeout(prefetchTimer.current);
-  }
 
   return (
     <div className={isExpanded ? `${styles.card} ${styles.expanded}` : styles.card}>
@@ -44,12 +19,9 @@ export function LeagueCard({ league, isExpanded, onToggle }: LeagueCardProps) {
         type="button"
         className={styles.header}
         aria-expanded={isExpanded}
-        aria-controls={panelId}
+        // The panel only exists while the card is open.
+        aria-controls={isExpanded ? panelId : undefined}
         onClick={onToggle}
-        onMouseEnter={schedulePrefetch}
-        onMouseLeave={cancelPrefetch}
-        onFocus={schedulePrefetch}
-        onBlur={cancelPrefetch}
       >
         <span className={styles.name}>{league.strLeague}</span>
         <span className={styles.sport}>{league.strSport}</span>

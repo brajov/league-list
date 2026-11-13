@@ -8,7 +8,7 @@ import { createQueryClient } from './queryClient';
 import { fakeApi } from './test/fakeApi';
 
 // These tests drive the whole app the way a user would: find things by their
-// role and visible text, type, click and hover. Only the network is faked.
+// role and visible text, type and click. Only the network is faked.
 
 const PREMIER_LEAGUE: League = {
   idLeague: '4328',
@@ -48,10 +48,6 @@ function leagueRow(name: string | RegExp) {
 async function findLeagueRows() {
   const list = await screen.findByRole('list');
   return within(list).getAllByRole('button');
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 describe('league list', () => {
@@ -329,34 +325,5 @@ describe('season badge', () => {
     await user.click(leagueRow(/English Premier League/));
     expect(leagueRow(/English Premier League/)).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByRole('img')).toBeInTheDocument();
-  });
-
-  it('is preloaded when the pointer rests on a row', async () => {
-    const api = fakeApi({ leagues: SOCCER_LEAGUES, seasons: { '4328': PREMIER_LEAGUE_SEASONS } });
-    const user = renderApp();
-    await findLeagueRows();
-
-    await user.hover(leagueRow(/English Premier League/));
-    await waitFor(() => expect(api.count('search_all_seasons.php', { id: '4328' })).toBe(1));
-
-    await user.click(leagueRow(/English Premier League/));
-
-    // Already cached: shown at once and not requested again.
-    expect(screen.getByRole('img')).toBeInTheDocument();
-    expect(api.count('search_all_seasons.php', { id: '4328' })).toBe(1);
-  });
-
-  it('is not preloaded when the pointer only passes over rows', async () => {
-    const api = fakeApi({ leagues: SOCCER_LEAGUES });
-    const user = renderApp();
-    await findLeagueRows();
-
-    for (const name of [/English Premier League/, /Spanish La Liga/, /German Bundesliga/]) {
-      await user.hover(leagueRow(name));
-      await user.unhover(leagueRow(name));
-    }
-    await sleep(200); // longer than the preload delay
-
-    expect(api.count('search_all_seasons.php')).toBe(0);
   });
 });
