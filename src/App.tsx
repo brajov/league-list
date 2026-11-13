@@ -8,6 +8,7 @@ import { SportSelect } from './components/SportSelect/SportSelect';
 import { StatusMessage } from './components/StatusMessage/StatusMessage';
 import { useLeagues } from './hooks/useLeagues';
 import { useOpenLeague } from './hooks/useOpenLeague';
+import { describeError } from './lib/describeError';
 import { ALL_SPORTS, filterLeagues } from './lib/filterLeagues';
 import { getSports } from './lib/getSports';
 import { paginate } from './lib/paginate';
@@ -64,6 +65,7 @@ export function App() {
         <StatusMessage
           variant="error"
           message="Could not load leagues."
+          detail={describeError(leaguesQuery.error)}
           actionLabel="Retry"
           onAction={() => leaguesQuery.refetch()}
         />

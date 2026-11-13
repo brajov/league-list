@@ -70,7 +70,10 @@ describe('league list', () => {
     const api = fakeApi({ leagues: 'error' });
     const user = renderApp();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load leagues.');
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Could not load leagues.');
+    // The reason is shown too, so the user knows whether retrying can help.
+    expect(alert).toHaveTextContent('HTTP 500');
 
     api.state.leagues = SOCCER_LEAGUES;
     await user.click(screen.getByRole('button', { name: 'Retry' }));

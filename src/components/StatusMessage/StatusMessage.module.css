@@ -11,6 +11,12 @@
   color: var(--color-text-muted);
 }
 
+.detail {
+  max-width: 44ch;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
 .action {
   padding: var(--space-2) var(--space-4);
   border: 0;

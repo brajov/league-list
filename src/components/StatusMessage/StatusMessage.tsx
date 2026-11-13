@@ -3,6 +3,8 @@ import styles from './StatusMessage.module.css';
 type StatusMessageProps = {
   variant: 'loading' | 'empty' | 'error';
   message: string;
+  // Optional second line, e.g. why a request failed.
+  detail?: string;
   actionLabel?: string;
   onAction?: () => void;
 };
@@ -10,7 +12,13 @@ type StatusMessageProps = {
 const SKELETON_CARD_COUNT = 6;
 
 // Shared display for the list's loading, empty and error states.
-export function StatusMessage({ variant, message, actionLabel, onAction }: StatusMessageProps) {
+export function StatusMessage({
+  variant,
+  message,
+  detail,
+  actionLabel,
+  onAction,
+}: StatusMessageProps) {
   if (variant === 'loading') {
     return (
       <div role="status">
@@ -28,6 +36,7 @@ export function StatusMessage({ variant, message, actionLabel, onAction }: Statu
   return (
     <div className={styles.box} role={variant === 'error' ? 'alert' : 'status'}>
       <p className={styles.message}>{message}</p>
+      {detail && <p className={styles.detail}>{detail}</p>}
       {actionLabel && onAction && (
         <button type="button" className={styles.action} onClick={onAction}>
           {actionLabel}
