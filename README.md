@@ -19,6 +19,33 @@ sport). Open **http://localhost:5173/?demo=multi-sport** to load the US leagues
 instead (Soccer, Basketball, Motorsport, American Football), where it shows.
 See [Known limitation](#known-limitation).
 
+## API key
+
+The app uses TheSportsDB's free test key (`123`) unless you give it your own. To
+use your own key, copy `.env.example` to `.env.local` (gitignored) and set it:
+
+```bash
+cp .env.example .env.local
+# .env.local
+VITE_SPORTSDB_API_KEY=your-key
+```
+
+Restart `npm run dev` after changing it, because Vite reads `.env` files on
+startup. For a build, the variable can also come from the environment
+(`VITE_SPORTSDB_API_KEY=your-key npm run build`), for example a CI secret. A key
+that is unset or blank falls back to `123`. The lookup lives in `src/api/config.ts`.
+
+**The key is not secret.** Vite writes `VITE_*` values into the JavaScript bundle
+at build time, and API v1 puts the key in the request URL, so anyone using the app
+can read it in the network tab. Vite's docs say not to put API keys in `VITE_*`
+variables, and TheSportsDB says the same of v1 keys. That is acceptable for the
+public test key and for a personal demo. For a paid key in production, keep the key
+on a server: a small proxy or serverless function holds it in a server-only
+environment variable, adds it to the upstream request (v2 takes it as an
+`X-API-KEY` header), and the app calls the proxy instead of TheSportsDB. A proxy
+also lets you cache responses and rate-limit callers, so one user cannot use up
+the key's quota (30 requests a minute on the free key, 100 on premium).
+
 ## Scripts
 
 | Script                 | What it does                               |
@@ -39,6 +66,7 @@ src/
   queryClient.ts      createQueryClient(): cache and retry settings, shared with the tests
   App.tsx             filter state (search, sport, expanded league) and page layout
   api/
+    config.ts         API key (VITE_SPORTSDB_API_KEY, falling back to the free key) and base URL
     schemas.ts        Zod schemas; the League and Season types are inferred from them
     client.ts         fetchJson(url, schema): fetch, check status, validate
     leagues.ts        getLeagues(source), getSeasonBadge(leagueId)
@@ -118,7 +146,7 @@ src/
 
 The free API key (`123`) returns only 10 leagues, all of them Soccer, so the sport
 dropdown is hidden with that key. It appears automatically as soon as the response
-contains a second sport (for example with a premium key). To see it with the free
+contains a second sport (for example with a premium key in `VITE_SPORTSDB_API_KEY`). To see it with the free
 key, open the app with `?demo=multi-sport`. That loads
 `search_all_leagues.php?c=United%20States` instead, which returns Soccer,
 Basketball, Motorsport and American Football leagues with real ids, so their
