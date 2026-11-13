@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import type { League } from './api/schemas';
-import { App } from './App';
+import { App, PAGE_SIZE } from './App';
 import { createQueryClient } from './queryClient';
 import { fakeApi } from './test/fakeApi';
 
@@ -325,5 +325,81 @@ describe('season badge', () => {
     await user.click(leagueRow(/English Premier League/));
     expect(leagueRow(/English Premier League/)).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByRole('img')).toBeInTheDocument();
+  });
+});
+
+describe('pagination', () => {
+  // More leagues than fit on two pages, the way a premium key returns them.
+  const MANY_LEAGUES: League[] = Array.from({ length: PAGE_SIZE * 2 + 5 }, (_, index) => ({
+    idLeague: String(index + 1),
+    strLeague: `League ${index + 1}`,
+    strSport: 'Soccer',
+  }));
+
+  function rowNames(rows: HTMLElement[]) {
+    return rows.map((row) => row.textContent?.replace('Soccer', ''));
+  }
+
+  it('is hidden when every league fits on one page', async () => {
+    fakeApi({ leagues: SOCCER_LEAGUES });
+    renderApp();
+    await findLeagueRows();
+
+    expect(screen.queryByRole('navigation', { name: 'Pagination' })).not.toBeInTheDocument();
+  });
+
+  it('shows one page at a time and moves with Next and Previous', async () => {
+    fakeApi({ leagues: MANY_LEAGUES });
+    const user = renderApp();
+
+    const firstPage = await findLeagueRows();
+    expect(firstPage).toHaveLength(PAGE_SIZE);
+    expect(rowNames(firstPage)[0]).toBe('League 1');
+    // The heading still counts every league, not only this page.
+    expect(
+      screen.getByRole('heading', { name: new RegExp(`\\(${MANY_LEAGUES.length}\\)`) }),
+    ).toBeInTheDocument();
+
+    const pagination = screen.getByRole('navigation', { name: 'Pagination' });
+    const previous = within(pagination).getByRole('button', { name: 'Previous' });
+    const next = within(pagination).getByRole('button', { name: 'Next' });
+    expect(pagination).toHaveTextContent(`1–${PAGE_SIZE} of ${MANY_LEAGUES.length}`);
+    expect(previous).toBeDisabled();
+
+    await user.click(next);
+    expect(rowNames(await findLeagueRows())[0]).toBe(`League ${PAGE_SIZE + 1}`);
+    expect(previous).toBeEnabled();
+
+    await user.click(next);
+    const lastPage = await findLeagueRows();
+    expect(lastPage).toHaveLength(5);
+    expect(pagination).toHaveTextContent(
+      `${PAGE_SIZE * 2 + 1}–${MANY_LEAGUES.length} of ${MANY_LEAGUES.length}`,
+    );
+    expect(next).toBeDisabled();
+
+    await user.click(previous);
+    expect(rowNames(await findLeagueRows())[0]).toBe(`League ${PAGE_SIZE + 1}`);
+  });
+
+  it('searches every page and goes back to the first page when the search changes', async () => {
+    fakeApi({ leagues: MANY_LEAGUES });
+    const user = renderApp();
+    await findLeagueRows();
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    // "League 5" is on the first page; the search must still find it.
+    await user.type(screen.getByRole('searchbox', { name: 'Search leagues' }), 'League 5');
+
+    expect(rowNames(await findLeagueRows())).toEqual([
+      'League 5',
+      'League 50',
+      'League 51',
+      'League 52',
+      'League 53',
+      'League 54',
+      'League 55',
+    ]);
+    expect(screen.queryByRole('navigation', { name: 'Pagination' })).not.toBeInTheDocument();
   });
 });

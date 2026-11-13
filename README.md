@@ -57,6 +57,7 @@ src/
   lib/
     filterLeagues.ts  pure filter by name + sport (tested)
     getSports.ts      unique sorted sports for the dropdown (tested)
+    paginate.ts       cuts one page out of the filtered list (tested)
   components/         one folder per component: Component.tsx + Component.module.css
   styles/
     tokens.css        colours, spacing, radii (CSS variables)
@@ -91,7 +92,14 @@ src/
   as the brief asks.
 - **A single search result opens automatically**, and can still be closed.
 - **Filtering is local.** Case-insensitive substring match on the name plus an
-  exact sport match. No debounce: the list is small.
+  exact sport match. No debounce: even 3000 rows filter instantly.
+- **Pagination is local too.** `all_leagues.php` has no offset, page or cursor
+  parameter (tried: they are ignored) and no paging metadata; the docs list a
+  fixed cap of 3000 leagues for a premium key, all in one response. So the app
+  filters the whole response and shows 25 rows a page, with Previous / Next and
+  "26–50 of 3000". The pager appears only when there is more than one page
+  (never with the free key's 10 leagues), a filter change goes back to page 1,
+  and the heading count stays the total of all matching leagues.
 - **Plain CSS Modules** with one tokens file; filters stack on narrow screens.
 - **Tests act like a user.** `App.test.tsx` renders the whole app with the real
   query client and fakes only `fetch`. The filter functions, schemas and API key
