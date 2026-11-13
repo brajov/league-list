@@ -1,0 +1,37 @@
+.figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.image {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+}
+
+.caption {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.retry {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-brand);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-brand);
+  font-weight: 600;
+  cursor: pointer;
+}

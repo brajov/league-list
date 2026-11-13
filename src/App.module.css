@@ -1,0 +1,20 @@
+.main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-6);
+}
+
+/* Filters stack on phones and sit side by side from tablet width up. */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+@media (min-width: 640px) {
+  .filters {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}

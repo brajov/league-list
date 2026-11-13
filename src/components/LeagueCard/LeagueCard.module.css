@@ -1,0 +1,52 @@
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.expanded {
+  border-color: var(--color-brand);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.header:hover {
+  background: var(--color-page-bg);
+}
+
+/* Keep the focus ring inside the card so overflow: hidden does not clip it. */
+.header:focus-visible {
+  outline-offset: -2px;
+}
+
+.name {
+  font-weight: 700;
+}
+
+.chip {
+  flex-shrink: 0;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-chip-bg);
+  color: var(--color-chip-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.panel {
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
