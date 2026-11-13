@@ -25,6 +25,20 @@ describe('filterLeagues', () => {
     ]);
   });
 
+  it('ignores accents in both the search and the league name', () => {
+    const accented: League[] = [
+      { idLeague: '5', strLeague: 'Brasileirão Série A', strSport: 'Soccer' },
+      { idLeague: '6', strLeague: 'Serie A', strSport: 'Soccer' },
+    ];
+    expect(names(filterLeagues(accented, 'brasileirao', ALL_SPORTS))).toEqual([
+      'Brasileirão Série A',
+    ]);
+    expect(names(filterLeagues(accented, 'série', ALL_SPORTS))).toEqual([
+      'Brasileirão Série A',
+      'Serie A',
+    ]);
+  });
+
   it('filters by sport', () => {
     expect(names(filterLeagues(leagues, '', 'Basketball'))).toEqual([
       'NBA',
