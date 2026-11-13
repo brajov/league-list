@@ -73,6 +73,9 @@ src/
   on the league name, plus an exact sport match. No debounce: the list is small.
 - **States.** Loading skeleton, error with Retry, and an empty state with a
   "Clear filters" action.
+- **A single search result opens automatically.** When the filters leave exactly
+  one league, its badge is shown without a click. This is derived in `App.tsx`
+  rather than stored, so widening the search restores whatever was open before.
 - **Badge preloading.** Resting the pointer on a row (or focusing it) for 150ms
   fetches that league's badge data and image into the cache, so it is ready when
   the row is opened. The short delay stops a sweep across the list from firing a

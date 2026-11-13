@@ -19,6 +19,9 @@ export function App() {
   const sports = getSports(leagues);
   const visibleLeagues = filterLeagues(leagues, search, sport);
 
+  // A single result is opened automatically: there is nothing else to choose.
+  const openLeagueId = visibleLeagues.length === 1 ? visibleLeagues[0].idLeague : expandedLeagueId;
+
   function toggleLeague(leagueId: string) {
     setExpandedLeagueId((current) => (current === leagueId ? null : leagueId));
   }
@@ -56,7 +59,7 @@ export function App() {
     return (
       <LeagueList
         leagues={visibleLeagues}
-        expandedLeagueId={expandedLeagueId}
+        expandedLeagueId={openLeagueId}
         onToggleLeague={toggleLeague}
       />
     );
