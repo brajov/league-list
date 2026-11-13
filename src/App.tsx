@@ -66,11 +66,19 @@ export function App() {
     <>
       <Header />
       <main className={styles.main}>
-        <div className={styles.filters}>
-          <SearchInput value={search} onChange={setSearch} />
-          <SportSelect sports={sports} value={sport} onChange={setSport} />
-        </div>
-        {renderContent()}
+        <section className={styles.panel}>
+          <div className={styles.filters}>
+            <SearchInput value={search} onChange={setSearch} />
+            <SportSelect sports={sports} value={sport} onChange={setSport} />
+          </div>
+          <h2 className={styles.sectionHeader}>
+            All Leagues
+            {leaguesQuery.isSuccess && (
+              <span className={styles.count}>({visibleLeagues.length})</span>
+            )}
+          </h2>
+          {renderContent()}
+        </section>
       </main>
     </>
   );

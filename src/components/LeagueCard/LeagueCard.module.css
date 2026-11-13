@@ -1,22 +1,14 @@
+/* One row in the league list, separated from the next by a thin line. */
 .card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
-}
-
-.expanded {
-  border-color: var(--color-brand);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
   gap: var(--space-3);
   width: 100%;
-  padding: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border: 0;
   background: transparent;
   text-align: left;
@@ -24,29 +16,47 @@
 }
 
 .header:hover {
-  background: var(--color-page-bg);
+  background: var(--color-row-hover);
 }
 
-/* Keep the focus ring inside the card so overflow: hidden does not clip it. */
+/* Keep the focus ring inside the row so the panel's overflow: hidden does not clip it. */
 .header:focus-visible {
   outline-offset: -2px;
 }
 
+/* Takes the free space, pushing the sport and chevron to the right. */
 .name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.expanded .name {
   font-weight: 700;
 }
 
-.chip {
+.sport {
   flex-shrink: 0;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--color-chip-bg);
-  color: var(--color-chip-text);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+/* A small arrow drawn with two borders; points down, flips up when open. */
+.chevron {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin: 0 var(--space-1);
+  border-right: 2px solid var(--color-text);
+  border-bottom: 2px solid var(--color-text);
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.expanded .chevron {
+  transform: translateY(2px) rotate(-135deg);
 }
 
 .panel {
   padding: var(--space-4);
   border-top: 1px solid var(--color-border);
+  background: var(--color-row-hover);
 }

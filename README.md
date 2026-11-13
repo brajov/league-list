@@ -73,8 +73,13 @@ src/
   on the league name, plus an exact sport match. No debounce: the list is small.
 - **States.** Loading skeleton, error with Retry, and an empty state with a
   "Clear filters" action.
-- **Plain CSS Modules** with a single tokens file. Mobile-first: one column on
-  phones, two from 640px, three from 1024px. Filters stack on narrow screens.
+- **Badge preloading.** Resting the pointer on a row (or focusing it) for 150ms
+  fetches that league's badge data and image into the cache, so it is ready when
+  the row is opened. The short delay stops a sweep across the list from firing a
+  request per row and tripping the API's rate limit.
+- **Plain CSS Modules** with a single tokens file. The list is a single column of
+  rows inside one panel, so opening a row never leaves gaps. Filters stack on
+  narrow screens.
 - **Few dependencies.** React, React Query and Zod at runtime; Vite, TypeScript,
   Vitest, oxlint and Prettier for tooling. No router, state library or UI kit.
 

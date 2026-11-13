@@ -39,8 +39,8 @@ export function SeasonBadge({ leagueName, season, isLoading, isError, onRetry }:
         className={styles.image}
         src={season.strBadge}
         alt={`${leagueName} badge, ${season.strSeason} season`}
-        width={160}
-        height={160}
+        width={128}
+        height={128}
       />
       <figcaption className={styles.caption}>Season {season.strSeason}</figcaption>
     </figure>

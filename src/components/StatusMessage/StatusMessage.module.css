@@ -4,9 +4,6 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-6) var(--space-4);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
   text-align: center;
 }
 
@@ -28,28 +25,16 @@
   background: var(--color-brand-dark);
 }
 
-/* Same grid as LeagueList so the layout does not jump when data arrives. */
+/* Placeholder rows, the same height as a league row. */
 .skeletonGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-4);
-}
-
-@media (min-width: 640px) {
-  .skeletonGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .skeletonGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  display: flex;
+  flex-direction: column;
 }
 
 .skeletonCard {
-  height: 58px;
-  border-radius: var(--radius-md);
+  height: 20px;
+  margin: 12px var(--space-4);
+  border-radius: var(--radius-sm);
   background: var(--color-skeleton);
   animation: pulse 1.2s ease-in-out infinite;
 }
