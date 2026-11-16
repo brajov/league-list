@@ -55,6 +55,7 @@ src/
   hooks/
     useLeagues.ts     React Query hook for the league list (reads ?demo=multi-sport)
     useSeasonBadge.ts React Query hook for one league's badge
+    useOpenLeague.ts  which row is open; auto-opens a single result (tested)
   lib/
     filterLeagues.ts  pure filter by name + sport (tested)
     describeError.ts  turns an ApiError into a hint for the user (tested)
@@ -98,7 +99,8 @@ src/
   as the brief asks.
 - **A single search result opens automatically**, and can still be closed.
 - **Filtering is local.** Substring match on the name, ignoring case and accents
-  ("brasileirao" finds "Brasileirão"), plus an exact sport match. No debounce: even 3000 rows filter instantly.
+  ("brasileirao" finds "Brasileirão"), plus an exact sport match. No debounce:
+  even 3000 rows filter instantly.
 - **Pagination is local too.** `all_leagues.php` has no offset, page or cursor
   parameter (tried: they are ignored) and no paging metadata; the docs list a
   fixed cap of 3000 leagues for a premium key, all in one response. So the app
