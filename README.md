@@ -6,7 +6,7 @@ shows a season badge when you click a league.
 
 ## Run it
 
-Requires Node 22.12+ (or 24+) and npm.
+Requires Node 24 LTS (22.13+ and 26+ also work) and npm. Run `nvm use` to switch to it.
 
 ```bash
 npm install
